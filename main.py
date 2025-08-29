@@ -19,10 +19,8 @@ except FileExistsError:
 	cprint("Dir is already existed. Recreating")
 	m = os.listdir(lesson)
 	for i in range(len(m)):
-		staticprint(f'{i+1}/{len(m)} files deleted')
 		os.remove(lesson+"/"+m[i])
 		cprint(f"{m[i]} deleted!")
-	staticprint("")
 
 st = ast
 mvi = '?'
@@ -36,12 +34,25 @@ for tp in ["audio", "video"]:
 		staticprint(f"{vi}/{mvi}")
 		url = href+lesson+st+str(vi)+ps
 		cprint(f"requesting {url}")
+		ec = 0
 		while True:
 			headers = {'authorization': f'Bearer {bearer}'}
+			r0 = requests.get(url, headers=headers) #try
+			code0 = r0.status_code
+			r1 = requests.get(url, headers=headers)
+			code1 = r1.status_code
 			r = requests.get(url, headers=headers)
 			code = r.status_code
-			if (code != 401): break
-			bearer = cinput("Bearer? ", True)
+
+			if not(code == code0 == code1) or (code == 401):
+				bearer = cinput("Bearer? ", True)
+				continue
+			elif not(r0.content == r1.content == r.content):
+				if (code == 200):
+					cprint("    Error: loss some data. Trying again...")
+					continue
+				else: cprint("    N: data mismatch in non-200 code")
+			break
 
 		if (code == 404):
 			cprint("    404 status code. Finishing the loop...")
