@@ -16,7 +16,7 @@ r = None
 
 try: os.mkdir(lesson)
 except FileExistsError:
-	cprint("Dir is already existed. Recreating")
+	cprint("Dir is already existed. Recreating", style="w")
 	m = os.listdir(lesson)
 	for i in range(len(m)):
 		os.remove(lesson+"/"+m[i])
@@ -49,13 +49,13 @@ for tp in ["audio", "video"]:
 				continue
 			elif not(r0.content == r1.content == r.content):
 				if (code == 200):
-					cprint("    Error: loss some data. Trying again...")
+					cprint("    Error: loss some data. Trying again...", style="w")
 					continue
-				else: cprint("    N: data mismatch in non-200 code")
+				else: cprint("    N: data mismatch in non-200 code", style="w")
 			break
 
 		if (code == 404):
-			cprint("    404 status code. Finishing the loop...")
+			cprint("    404 status code. Finishing the loop...", style="w")
 			break
 		if (code != 200): 
 			cinput("", True, f"    Error with code {code}")

@@ -1,18 +1,30 @@
+C = False
+try: 
+	from colorama import Fore
+	C = True
+
+except: print("Warning: colorama didn't installed")
 
 statictxt = ""
 
 def staticprint(text: str):
 	global statictxt
 	statictxt = text
-	print(statictxt, end='\r')
+	print("\r"+statictxt, end='\r')
 
 
-def cprint(text: str):
+def cprint(text: str, style: str| None=""):
+	"""w - yellow | e - red"""
+	c = ""
 	s = ""
 	for i in range(max(len(statictxt), len(text))):
-		if (i < len(text)): s += text[i]
+		if (i < len(text)):
+			if (text[i] == '\t'): s += "    "
+			else: s += text[i]
 		else: s += ' '
-	print(text)
+	if (style == "w"): c = Fore.YELLOW
+	elif (style == "e"): c = Fore.RED
+	print(c+text+Fore.RESET)
 	if (statictxt != ""): print(statictxt, end='\r')
 
 def cinput(text: str, erase_statictxt=False, estring="") -> str:
