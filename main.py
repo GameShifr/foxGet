@@ -3,6 +3,11 @@ import os
 from Console import cprint, staticprint, cinput
 import argparse
 from sys import argv
+sound = True
+try: import playsound
+except ModuleNotFoundError:
+	try: import playsound3 as playsound
+	except ModuleNotFoundError: sound = False
 
 # href lesson [vst/ast] [n] ps
 href = "https://apps.foxford.ru/webinar-foxford/storage/api/v2/backends/yandex/sets/hls.webinar.foxford.ru::"
@@ -20,6 +25,7 @@ parser = argparse.ArgumentParser(description="Загрузить видео из
 parser.add_argument("-d", "--del_all", action="store_true", help="delete all files except the output file")
 parser.add_argument("-s", "--save", action="store_true", help="save existed files in dir")
 parser.add_argument("-n", "--name", default=None, type=str, help="name of the output folder")
+parser.add_argument("--nosound", action="store_false", help="Asking bearer without sound")
 parser.add_argument("lesson", type=str, help="The lesson code")
 parser.add_argument("pstfix", type=str, help="Postfix string in file name")
 if (len(argv) != 1):
@@ -29,6 +35,7 @@ if (len(argv) != 1):
 	del_all = args.del_all
 	save = args.save
 	name = args.name
+	if (sound): sound = args.nosound
 else:
 	lesson = cinput("lesson: ")
 	ps = cinput("pstfix: ")
@@ -86,6 +93,8 @@ for tp in ["audio", "video"]:
 			code = r.status_code
 
 			if not(code == code0 == code1) or (code == 401):
+				try: playsound.playsound("bearer_requested_sound.mp3", True)
+				except: cprint("An error with playing bearer_requested_sound.mp3", 'e')
 				bearer = cinput("Bearer? ", True)
 				continue
 			elif not(r0.content == r1.content == r.content):
