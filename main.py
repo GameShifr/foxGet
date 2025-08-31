@@ -1,26 +1,38 @@
 import requests
 import os
 from Console import cprint, staticprint, cinput
+import argparse
+
+parser = argparse.ArgumentParser(description="Загрузить видео из вебинара foxford")
+parser.add_argument("-d", "--del_all", action="store_true", help="delete all files except the output file")
+parser.add_argument("-s", "--save", action="store_true", help="save existed files in dir")
+parser.add_argument("lesson", type=str, help="The lesson code")
+parser.add_argument("pstfix", type=str, help="Postfix string in file name")
+args = parser.parse_args()
 
 # href lesson [vst/ast] [n] ps
 href = "https://apps.foxford.ru/webinar-foxford/storage/api/v2/backends/yandex/sets/hls.webinar.foxford.ru::"
-lesson = cinput("Lesson: ")
+lesson = args.lesson
 vst = "/objects/long.video.720p."
 ast = "/objects/long.audio.32kbps."
-ps = cinput("pstfix: ")
+ps = args.pstfix
 ps = f".{ps}.ts"
 
 bearer = ""
 code = None
 r = None
+exfiles = []
 
 try: os.mkdir(lesson)
 except FileExistsError:
-	cprint("Dir is already existed. Recreating", style="w")
-	m = os.listdir(lesson)
-	for i in range(len(m)):
-		os.remove(lesson+"/"+m[i])
-		cprint(f"{m[i]} deleted!")
+	exfiles = os.listdir(lesson)
+	if not(args.save):
+		cprint("Dir is already existed. Recreating", style="w")
+		for i in range(len(exfiles)):
+			os.remove(lesson+"/"+exfiles[i])
+			cprint(f"{exfiles[i]} deleted!")
+		exfiles = []
+	else: cprint("Dir is already existed.", style="w")
 
 st = ast
 mvi = '?'
@@ -32,6 +44,17 @@ for tp in ["audio", "video"]:
 	while True:
 		vi += 1
 		staticprint(f"{vi}/{mvi}")
+		if (args.save) and (len(exfiles) < 3) and (len(exfiles) > 0): #fs
+			cprint("Deleting last ex-files in dir...")
+			for i in range(len(exfiles)):
+				os.remove(lesson+"/"+exfiles[i])
+				cprint(f"    {exfiles[i]} deleted!")
+			exfiles = []
+		if (args.save) and (f"{tp}.{vi}.ts" in exfiles):
+			cprint(f"file {tp}.{vi}.ts already existed. Continuing...")
+			exfiles.remove(f"{tp}.{vi}.ts")
+			continue
+
 		url = href+lesson+st+str(vi)+ps
 		cprint(f"requesting {url}")
 		ec = 0
@@ -74,12 +97,18 @@ for tp in ["audio", "video"]:
 	cprint(f"list of {tp} files has been created! Total:{vi-1}")
 	mvi = str(vi-1)
 
+t = []
+if (args.del_all):
+	t = ["del audio.txt\n", "del video.txt\n"]
+	for i in ["video", "audio"]:
+		for j in range(1, vi):
+			t.append(f"del {i}.{j}.ts\n")
 with open(f"{lesson}/script.bat", "w") as f:
 	f.writelines(["ffmpeg -f concat -i video.txt -c copy video.ts\n",
 							 "ffmpeg -f concat -i audio.txt -c copy audio.ts\n",
 							 "ffmpeg -i video.ts -i audio.ts -c:v copy -c:a copy _output.mp4\n",
 							 "del video.ts\n",
-							 "del audio.ts"])
+							 "del audio.ts\n"]+t)
 cprint("Bat file has been created!")
 t = ""
 while (t != 'y') and (t != 'n'):
