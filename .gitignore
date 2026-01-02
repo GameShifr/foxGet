@@ -2,4 +2,6 @@
 !.gitignore
 !main.py
 !Console.py
-!bearer_requested_sound.mp3
+!README.md
+!resources/
+!resources/*

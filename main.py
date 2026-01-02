@@ -93,7 +93,7 @@ for tp in ["audio", "video"]:
 			code = r.status_code
 
 			if not(code == code0 == code1) or (code == 401):
-				try: playsound.playsound("bearer_requested_sound.mp3", True)
+				try: playsound.playsound("resources/bearer_requested_sound.mp3", True)
 				except: cprint("An error with playing bearer_requested_sound.mp3", 'e')
 				bearer = cinput("Bearer? ", True)
 				continue
